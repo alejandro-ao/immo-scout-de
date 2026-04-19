@@ -15,12 +15,6 @@ function playSound() {
 }
 
 async function showNotification(listings) {
-  const permission = await chrome.permissions.contains({ permissions: ['notifications'] });
-  if (!permission) {
-    console.error('[Immoscout Monitor] Notification permission not granted');
-    return;
-  }
-
   const count = listings.length;
   const firstTitle = listings[0].title;
 
