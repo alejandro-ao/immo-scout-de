@@ -1,4 +1,4 @@
-const SOUND_URL = chrome.runtime.getURL('notification.wav');
+const SOUND_URL = chrome.runtime.getURL('notification.mp3');
 let pendingListings = [];
 
 async function playSoundInTab(tabId) {
@@ -33,7 +33,7 @@ async function showNotification(listings) {
     type: 'basic',
     iconUrl: chrome.runtime.getURL('icon.png'),
     title: count === 1 ? 'New Listing Found!' : `${count} New Listings Found!`,
-    body: body,
+    message: body,
     priority: 2
   }, notificationId => {
     if (chrome.runtime.lastError) {
