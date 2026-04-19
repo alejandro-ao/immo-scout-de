@@ -43,6 +43,10 @@ Mit freundlichen Grüßen`,
   monthlyIncome: '',
   birthYear: '',
   occupation: '',
+  numberOfAdults: '1',
+  numberOfKids: '0',
+  hasPets: '',
+  salutation: '',
   telegramBotToken: '',
   telegramChatId: ''
 };
@@ -177,6 +181,10 @@ async function loadSettingsIntoForm() {
   monthlyIncomeInput.value = settings.monthlyIncome;
   birthYearInput.value = settings.birthYear;
   occupationInput.value = settings.occupation;
+  document.getElementById('numberOfAdults').value = settings.numberOfAdults || '1';
+  document.getElementById('numberOfKids').value = settings.numberOfKids || '0';
+  document.getElementById('hasPets').value = settings.hasPets || '';
+  document.getElementById('salutation').value = settings.salutation || '';
   document.getElementById('telegramBotToken').value = settings.telegramBotToken || '';
   document.getElementById('telegramChatId').value = settings.telegramChatId || '';
 }
@@ -193,6 +201,10 @@ async function saveSettings() {
     monthlyIncome: monthlyIncomeInput.value,
     birthYear: birthYearInput.value,
     occupation: occupationInput.value,
+    numberOfAdults: document.getElementById('numberOfAdults').value,
+    numberOfKids: document.getElementById('numberOfKids').value,
+    hasPets: document.getElementById('hasPets').value,
+    salutation: document.getElementById('salutation').value,
     telegramBotToken: document.getElementById('telegramBotToken').value,
     telegramChatId: document.getElementById('telegramChatId').value
   };

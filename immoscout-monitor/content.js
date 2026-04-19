@@ -188,7 +188,9 @@
       postcode: 'input[id="postcode"]',
       city: 'input[id="city"]',
       incomeAmount: 'input[id="incomeAmount"]',
-      numberOfAdults: 'input[id="numberOfAdults"]'
+      numberOfAdults: 'input[id="numberOfAdults"]',
+      numberOfKids: 'input[id="numberOfKids"]',
+      hasPets: 'select[name="hasPets"]'
     };
 
     const fieldMappings = {
@@ -196,7 +198,10 @@
       lastName: settings.lastName,
       phoneNumber: settings.phone,
       incomeAmount: settings.monthlyIncome,
-      message: settings.messageTemplate
+      message: settings.messageTemplate,
+      numberOfAdults: settings.numberOfAdults || '1',
+      numberOfKids: settings.numberOfKids || '0',
+      hasPets: settings.hasPets || ''
     };
 
     const addressParts = (settings.address || '').split(' ');
@@ -216,8 +221,8 @@
       let value = '';
 
       if (key === 'salutation') {
-        if (settings.lastName) {
-          el.value = 'MALE';
+        if (settings.salutation) {
+          el.value = settings.salutation;
           el.dispatchEvent(new Event('change', { bubbles: true }));
           filled++;
         }
@@ -241,6 +246,17 @@
         el.value = value;
         el.dispatchEvent(new Event('input', { bubbles: true }));
         filled++;
+      } else if (key === 'numberOfKids') {
+        value = fieldMappings.numberOfKids || '0';
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        filled++;
+      } else if (key === 'hasPets') {
+        if (fieldMappings.hasPets) {
+          el.value = fieldMappings.hasPets;
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          filled++;
+        }
       } else if (fieldMappings[key]) {
         value = fieldMappings[key];
         el.value = value;
