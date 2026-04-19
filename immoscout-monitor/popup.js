@@ -56,9 +56,18 @@ async function sendToContent(message) {
   try {
     const tab = await getCurrentTab();
     if (!tab || !tab.id) return null;
-    return await chrome.tabs.sendMessage(tab.id, message);
+    return new Promise((resolve) => {
+      chrome.tabs.sendMessage(tab.id, message, (response) => {
+        if (chrome.runtime.lastError) {
+          console.warn('Content script not ready:', chrome.runtime.lastError.message);
+          resolve(null);
+          return;
+        }
+        resolve(response);
+      });
+    });
   } catch (e) {
-    console.warn('Content script not ready:', e.message);
+    console.warn('Content script error:', e.message);
     return null;
   }
 }
@@ -168,8 +177,8 @@ toggleBtn.addEventListener('click', toggleMonitoring);
 checkNowBtn.addEventListener('click', checkNow);
 resetBtn.addEventListener('click', resetCount);
 
-document.getElementById('testNotificationBtn').addEventListener('click', async () => {
-  await sendToContent({ type: 'TEST_NOTIFICATION' });
+document.getElementById('testNotificationBtn').addEventListener('click', () => {
+  sendToContent({ type: 'TEST_NOTIFICATION' });
 });
 settingsBtn.addEventListener('click', toggleSettings);
 
