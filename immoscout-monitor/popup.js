@@ -251,6 +251,11 @@ document.getElementById('testTelegramBtn').addEventListener('click', async () =>
 
 settingsBtn.addEventListener('click', toggleSettings);
 
+document.getElementById('telegramHelp').addEventListener('click', e => {
+  e.preventDefault();
+  alert('Telegram Setup:\n\n1. Open Telegram and search @BotFather\n2. Send /newbot and follow prompts\n3. Copy the bot token\n4. Search your new bot and send it a message\n5. Go to @userinfobot to get your Chat ID\n6. Enter both below and click Test Telegram');
+});
+
 refreshRateInput.addEventListener('input', () => {
   refreshValue.textContent = formatRefreshValue(parseInt(refreshRateInput.value, 10));
 });

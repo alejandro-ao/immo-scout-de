@@ -45,9 +45,7 @@
 
       <div class="divider"></div>
 
-      <div class="setting-group">
-        <label>Your Profile (for auto-fill)</label>
-      </div>
+      <h2>Profile (for auto-fill)</h2>
 
       <div class="field-row">
         <div class="field">
@@ -69,11 +67,27 @@
         <div class="field">
           <input type="tel" id="phone" placeholder="Phone">
         </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <input type="text" id="monthlyIncome" placeholder="Monthly Income (netto)">
+        </div>
+        <div class="field">
+          <input type="number" id="birthYear" placeholder="Birth Year">
+        </div>
+      </div>
+
+      <div class="field">
+        <input type="text" id="occupation" placeholder="Occupation">
+      </div>
 
       <div class="divider"></div>
 
-      <div class="setting-group">
-        <label>Telegram Bot (optional)</label>
+      <h2>Telegram Notifications</h2>
+
+      <div class="telegram-help">
+        <a href="#" id="telegramHelp">How to set up?</a>
       </div>
 
       <div class="field">
@@ -87,19 +101,8 @@
       <div class="buttons">
         <button id="testTelegramBtn" class="btn secondary">Test Telegram</button>
       </div>
-      </div>
 
-      <div class="field">
-        <input type="text" id="monthlyIncome" placeholder="Monthly Income (netto)">
-      </div>
-
-      <div class="field">
-        <input type="number" id="birthYear" placeholder="Birth Year">
-      </div>
-
-      <div class="field">
-        <input type="text" id="occupation" placeholder="Occupation">
-      </div>
+      <div class="divider"></div>
 
       <div class="buttons">
         <button id="saveSettings" class="btn primary">Save Settings</button>
