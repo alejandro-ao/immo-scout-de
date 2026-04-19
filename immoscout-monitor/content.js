@@ -1,12 +1,14 @@
 (function () {
   'use strict';
 
-  const POLL_INTERVAL = 180000;
+  const DEFAULT_POLL_INTERVAL = 180000;
   const STORAGE_KEY = 'lastSeenListings';
+  const SETTINGS_KEY = 'userSettings';
   const TAUSCH_PATTERNS = [/tauschwohnung/i, /wohnungstausch/i];
 
   let pollTimer = null;
   let isMonitoring = false;
+  let pollInterval = DEFAULT_POLL_INTERVAL;
 
   function isTauschWohnung(title) {
     return TAUSCH_PATTERNS.some(pattern => pattern.test(title));
@@ -86,11 +88,12 @@
     await saveLastSeenListings(currentListings);
   }
 
-  function startMonitoring() {
+  function startMonitoring(refreshRate) {
     if (isMonitoring) return;
     isMonitoring = true;
+    pollInterval = (refreshRate || DEFAULT_POLL_INTERVAL) * 1000;
     checkForNewListings();
-    pollTimer = setInterval(checkForNewListings, POLL_INTERVAL);
+    pollTimer = setInterval(checkForNewListings, pollInterval);
     chrome.runtime.sendMessage({ type: 'MONITORING_STARTED' });
   }
 
@@ -103,11 +106,19 @@
     chrome.runtime.sendMessage({ type: 'MONITORING_STOPPED' });
   }
 
+  function updateRefreshRate(newRate) {
+    pollInterval = newRate * 1000;
+    if (isMonitoring && pollTimer) {
+      clearInterval(pollTimer);
+      pollTimer = setInterval(checkForNewListings, pollInterval);
+    }
+  }
+
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'GET_STATUS') {
       sendResponse({ isMonitoring });
     } else if (message.type === 'START') {
-      startMonitoring();
+      startMonitoring(message.refreshRate);
       sendResponse({ success: true });
     } else if (message.type === 'STOP') {
       stopMonitoring();
@@ -115,6 +126,9 @@
     } else if (message.type === 'CHECK_NOW') {
       checkForNewListings().then(() => sendResponse({ success: true }));
       return true;
+    } else if (message.type === 'UPDATE_REFRESH_RATE') {
+      updateRefreshRate(message.refreshRate);
+      sendResponse({ success: true });
     }
     return true;
   });

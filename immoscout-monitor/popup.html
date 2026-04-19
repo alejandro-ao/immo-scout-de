@@ -5,7 +5,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>Immoscout Monitor</h1>
+    <div class="header">
+      <h1>Immoscout Monitor</h1>
+      <button id="settingsBtn" class="icon-btn" title="Settings">⚙</button>
+    </div>
 
     <div class="status">
       <span class="status-dot" id="statusDot"></span>
@@ -13,7 +16,6 @@
     </div>
 
     <div class="last-check" id="lastCheck">Last check: Never</div>
-
     <div class="new-count" id="newCount">New since reset: 0</div>
 
     <div class="buttons">
@@ -22,8 +24,67 @@
       <button id="resetBtn" class="btn secondary">Reset Count</button>
     </div>
 
-    <div class="message-link">
-      <a href="#" id="openMessage">Edit message template</a>
+    <div class="divider"></div>
+
+    <div class="settings-section" id="settingsSection" style="display: none;">
+      <h2>Settings</h2>
+
+      <div class="setting-group">
+        <label>Refresh Rate</label>
+        <div class="range-row">
+          <input type="range" id="refreshRate" min="30" max="600" step="30" value="180">
+          <span id="refreshValue">3 min</span>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label>Message Template</label>
+        <textarea id="messageTemplate" rows="4" placeholder="Your message to the landlord..."></textarea>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="setting-group">
+        <label>Your Profile (for auto-fill)</label>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <input type="text" id="firstName" placeholder="First Name">
+        </div>
+        <div class="field">
+          <input type="text" id="lastName" placeholder="Last Name">
+        </div>
+      </div>
+
+      <div class="field">
+        <input type="text" id="address" placeholder="Current Address">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <input type="email" id="email" placeholder="Email">
+        </div>
+        <div class="field">
+          <input type="tel" id="phone" placeholder="Phone">
+        </div>
+      </div>
+
+      <div class="field">
+        <input type="text" id="monthlyIncome" placeholder="Monthly Income (netto)">
+      </div>
+
+      <div class="field">
+        <input type="number" id="birthYear" placeholder="Birth Year">
+      </div>
+
+      <div class="field">
+        <input type="text" id="occupation" placeholder="Occupation">
+      </div>
+
+      <div class="buttons">
+        <button id="saveSettings" class="btn primary">Save Settings</button>
+      </div>
     </div>
   </div>
 
