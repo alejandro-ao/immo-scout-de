@@ -213,23 +213,26 @@ document.getElementById('testNotificationBtn').addEventListener('click', () => {
 });
 
 document.getElementById('testTelegramBtn').addEventListener('click', async () => {
-  const settings = await loadSettings();
-  if (!settings.telegramBotToken || !settings.telegramChatId) {
+  const botToken = document.getElementById('telegramBotToken').value.trim();
+  const chatId = document.getElementById('telegramChatId').value.trim();
+
+  if (!botToken || !chatId) {
     alert('Please enter both Telegram Bot Token and Chat ID');
     return;
   }
+
   const btn = document.getElementById('testTelegramBtn');
   btn.textContent = 'Sending...';
   btn.disabled = true;
 
-  const testMessage = `�テスト / Test: Immoscout Monitor is working! Time: ${new Date().toLocaleTimeString()}`;
+  const testMessage = `🆕 Test: Immoscout Monitor is working! Time: ${new Date().toLocaleTimeString()}`;
 
   try {
-    const response = await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: settings.telegramChatId,
+        chat_id: chatId,
         text: testMessage
       })
     });
