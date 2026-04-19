@@ -225,7 +225,7 @@ document.getElementById('testTelegramBtn').addEventListener('click', async () =>
   btn.textContent = 'Sending...';
   btn.disabled = true;
 
-  const testMessage = `🆕 Test: Immoscout Monitor is working! Time: ${new Date().toLocaleTimeString()}`;
+  const testMessage = `[TEST] Immoscout Monitor is working! Time: ${new Date().toLocaleTimeString()}`;
 
   try {
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
