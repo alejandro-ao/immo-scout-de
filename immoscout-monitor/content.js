@@ -6,6 +6,7 @@
   const STORAGE_KEY = 'lastSeenListings';
   const SETTINGS_KEY = 'userSettings';
   const TAUSCH_PATTERNS = [/tauschwohnung/i, /wohnungstausch/i];
+  const SECTION_HEADER_PATTERN = /^\d+\s+passende/i;
 
   let pollTimer = null;
   let isMonitoring = false;
@@ -13,6 +14,12 @@
 
   function isTauschWohnung(title) {
     return TAUSCH_PATTERNS.some(pattern => pattern.test(title));
+  }
+
+  function isValidListing(title) {
+    if (!title || title.trim() === '') return false;
+    if (SECTION_HEADER_PATTERN.test(title)) return false;
+    return true;
   }
 
   function parseListingsFromHTML(html) {
@@ -33,7 +40,7 @@
         const linkEl = el.querySelector('a');
         const link = linkEl?.href || '';
 
-        if (!isTauschWohnung(title)) {
+        if (isValidListing(title) && !isTauschWohnung(title)) {
           listings.push({ id, title, link });
         }
       });
