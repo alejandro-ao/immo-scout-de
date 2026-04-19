@@ -7,10 +7,20 @@ function playSound() {
     audio = new Audio(SOUND_URL);
   }
   audio.currentTime = 0;
-  audio.play().catch(() => {});
+  audio.play().then(() => {
+    console.log('[Immoscout Monitor] Sound played');
+  }).catch(err => {
+    console.error('[Immoscout Monitor] Sound error:', err.message);
+  });
 }
 
 async function showNotification(listings) {
+  const permission = await chrome.permissions.contains({ permissions: ['notifications'] });
+  if (!permission) {
+    console.error('[Immoscout Monitor] Notification permission not granted');
+    return;
+  }
+
   const count = listings.length;
   const firstTitle = listings[0].title;
 
@@ -30,7 +40,9 @@ async function showNotification(listings) {
     priority: 2
   }, notificationId => {
     if (chrome.runtime.lastError) {
-      console.error('Notification error:', chrome.runtime.lastError);
+      console.error('[Immoscout Monitor] Notification error:', chrome.runtime.lastError.message);
+    } else {
+      console.log('[Immoscout Monitor] Notification created:', notificationId);
     }
   });
 }
@@ -54,6 +66,7 @@ chrome.notifications.onClicked.addListener(notificationId => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('[Immoscout Monitor] Background received message:', message.type, message.listings?.length);
   if (message.type === 'NEW_LISTINGS') {
     showNotification(message.listings);
   }
@@ -63,3 +76,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.set({ lastSeenListings: [] });
 });
+
+console.log('[Immoscout Monitor] Background script loaded');

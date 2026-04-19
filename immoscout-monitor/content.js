@@ -130,6 +130,10 @@
         chrome.runtime.sendMessage({
           type: 'NEW_LISTINGS',
           listings: newListings
+        }).then(() => {
+          console.log('[Immoscout Monitor] Message sent to background');
+        }).catch(err => {
+          console.error('[Immoscout Monitor] Message send failed:', err.message);
         });
       }
 
