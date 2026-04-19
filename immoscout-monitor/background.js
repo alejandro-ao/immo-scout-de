@@ -1,17 +1,17 @@
 const SOUND_URL = chrome.runtime.getURL('notification.wav');
-let audio = null;
 let pendingListings = [];
 
-function playSound() {
-  if (!audio) {
-    audio = new Audio(SOUND_URL);
+async function playSoundInTab(tabId) {
+  try {
+    await chrome.tabs.executeScript(tabId, {
+      code: `
+        const audio = new Audio('${SOUND_URL}');
+        audio.play().then(() => console.log('[Immoscout Monitor] Sound played')).catch(e => console.error('[Immoscout Monitor] Sound error:', e));
+      `
+    });
+  } catch (err) {
+    console.error('[Immoscout Monitor] Could not play sound:', err.message);
   }
-  audio.currentTime = 0;
-  audio.play().then(() => {
-    console.log('[Immoscout Monitor] Sound played');
-  }).catch(err => {
-    console.error('[Immoscout Monitor] Sound error:', err.message);
-  });
 }
 
 async function showNotification(listings) {
@@ -22,7 +22,10 @@ async function showNotification(listings) {
     ? firstTitle
     : `${firstTitle} (+${count - 1} more)`;
 
-  playSound();
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab) {
+    playSoundInTab(tab.id);
+  }
 
   pendingListings = listings;
 
