@@ -78,7 +78,12 @@
   async function getCurrentPageUrl() {
     return new Promise(resolve => {
       chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-        resolve(tabs[0]?.url || null);
+        if (chrome.runtime.lastError) {
+          console.error('[Immoscout Monitor] Tab query error:', chrome.runtime.lastError.message);
+          resolve(null);
+          return;
+        }
+        resolve(tabs?.[0]?.url || null);
       });
     });
   }
