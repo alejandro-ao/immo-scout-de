@@ -167,6 +167,10 @@ async function saveSettings() {
 toggleBtn.addEventListener('click', toggleMonitoring);
 checkNowBtn.addEventListener('click', checkNow);
 resetBtn.addEventListener('click', resetCount);
+
+document.getElementById('testNotificationBtn').addEventListener('click', async () => {
+  await sendToContent({ type: 'TEST_NOTIFICATION' });
+});
 settingsBtn.addEventListener('click', toggleSettings);
 
 refreshRateInput.addEventListener('input', () => {

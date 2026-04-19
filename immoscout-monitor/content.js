@@ -246,6 +246,10 @@
       sendResponse({ success: true });
     } else if (message.type === 'HIGHLIGHT_LISTINGS') {
       highlightListings(message.listings);
+    } else if (message.type === 'TEST_NOTIFICATION') {
+      console.log('[Immoscout Monitor] TEST: Pretending current listings are new');
+      chrome.storage.local.set({ lastSeenListings: [] });
+      checkForNewListings();
     }
     return true;
   });
