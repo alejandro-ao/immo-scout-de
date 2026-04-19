@@ -22,6 +22,17 @@
     return true;
   }
 
+  function generateListingId(title, link) {
+    const str = `${title}|${link}`;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash).toString(36);
+  }
+
   function parseListingsFromHTML(html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
@@ -32,27 +43,25 @@
     if (containers.length === 0) {
       const fallback = doc.querySelectorAll('[class*="listing"]');
       fallback.forEach(el => {
-        const id = el.getAttribute('data-id') ||
-                   el.id ||
-                   Math.random().toString(36).substr(2, 9);
         const titleEl = el.querySelector('h2, h3, [class*="title"]');
         const title = titleEl?.textContent?.trim() || '';
         const linkEl = el.querySelector('a');
         const link = linkEl?.href || '';
 
         if (isValidListing(title) && !isTauschWohnung(title)) {
+          const id = generateListingId(title, link);
           listings.push({ id, title, link });
         }
       });
     } else {
       containers.forEach(el => {
-        const id = el.getAttribute('data-id');
         const titleEl = el.querySelector('h2, h3, [class*="title"]');
         const title = titleEl?.textContent?.trim() || '';
         const linkEl = el.querySelector('a');
         const link = linkEl?.href || '';
 
-        if (id && !isTauschWohnung(title)) {
+        if (isValidListing(title) && !isTauschWohnung(title)) {
+          const id = generateListingId(title, link);
           listings.push({ id, title, link });
         }
       });
@@ -163,6 +172,21 @@
     pollInterval = newRate * 1000;
   }
 
+  function findListingElement(listing) {
+    const allEls = document.querySelectorAll('[data-id], [class*="listing"]');
+    for (const el of allEls) {
+      const titleEl = el.querySelector('h2, h3, [class*="title"]');
+      const title = titleEl?.textContent?.trim() || '';
+      const linkEl = el.querySelector('a');
+      const link = linkEl?.href || '';
+      const id = generateListingId(title, link);
+      if (id === listing.id) {
+        return el;
+      }
+    }
+    return null;
+  }
+
   function highlightListings(listings) {
     const style = document.createElement('style');
     style.id = 'immoscout-monitor-highlight';
@@ -182,7 +206,7 @@
 
     let highlighted = 0;
     listings.forEach(listing => {
-      const el = document.querySelector(`[data-id="${listing.id}"]`);
+      const el = findListingElement(listing);
       if (el) {
         el.classList.add('immoscout-new-listing');
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
