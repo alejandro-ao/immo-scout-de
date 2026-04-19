@@ -22,8 +22,22 @@ async function sendTelegramMessage(listings) {
   }
 
 const count = listings.length;
-  const message = listings.map(l => `${l.title}\n${l.link}`).join('\n\n');
-  const fullMessage = `[IMMOSCOUT] ${count} new listing${count > 1 ? 's' : ''}!\n\n${message}`;
+  const MAX_LISTINGS = 10;
+  const MAX_TITLE_LEN = 100;
+  const MAX_MESSAGE_LEN = 3500;
+
+  let truncatedListings = listings.slice(0, MAX_LISTINGS);
+  let message = truncatedListings.map(l => {
+    const title = l.title.length > MAX_TITLE_LEN ? l.title.substring(0, MAX_TITLE_LEN) + '...' : l.title;
+    return `${title}\n${l.link}`;
+  }).join('\n\n');
+
+  if (message.length > MAX_MESSAGE_LEN) {
+    message = message.substring(0, MAX_MESSAGE_LEN) + '...';
+  }
+
+  const remaining = count > MAX_LISTINGS ? `\n\n...and ${count - MAX_LISTINGS} more` : '';
+  const fullMessage = `[IMMOSCOUT] ${count} new listing${count > 1 ? 's' : ''}!\n\n${message}${remaining}`;
 
   try {
     const response = await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
