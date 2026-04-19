@@ -176,6 +176,83 @@
     pollInterval = newRate * 1000;
   }
 
+  function autoFillForm(settings) {
+    const formSelectors = {
+      message: 'textarea[id="message"]',
+      salutation: 'select[name="salutation"]',
+      firstName: 'input[id="firstName"]',
+      lastName: 'input[id="lastName"]',
+      phoneNumber: 'input[id="phoneNumber"]',
+      street: 'input[id="street"]',
+      houseNumber: 'input[id="houseNumber"]',
+      postcode: 'input[id="postcode"]',
+      city: 'input[id="city"]',
+      incomeAmount: 'input[id="incomeAmount"]',
+      numberOfAdults: 'input[id="numberOfAdults"]'
+    };
+
+    const fieldMappings = {
+      firstName: settings.firstName,
+      lastName: settings.lastName,
+      phoneNumber: settings.phone,
+      incomeAmount: settings.monthlyIncome,
+      message: settings.messageTemplate
+    };
+
+    const addressParts = (settings.address || '').split(' ');
+    const street = addressParts.slice(0, -1).join(' ') || settings.address;
+    const houseNumber = addressParts[addressParts.length - 1] || '';
+
+    const cityPostcode = settings.address ? settings.address.match(/(\d{5})\s+(.+)/) : null;
+    const postcode = cityPostcode ? cityPostcode[1] : '';
+    const city = cityPostcode ? cityPostcode[2] : '';
+
+    let filled = 0;
+
+    Object.entries(formSelectors).forEach(([key, selector]) => {
+      const el = document.querySelector(selector);
+      if (!el) return;
+
+      let value = '';
+
+      if (key === 'salutation') {
+        if (settings.lastName) {
+          el.value = 'MALE';
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          filled++;
+        }
+      } else if (key === 'street') {
+        value = street;
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        filled++;
+      } else if (key === 'houseNumber') {
+        value = houseNumber;
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        filled++;
+      } else if (key === 'postcode') {
+        value = postcode;
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        filled++;
+      } else if (key === 'city') {
+        value = city;
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        filled++;
+      } else if (fieldMappings[key]) {
+        value = fieldMappings[key];
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        filled++;
+      }
+    });
+
+    console.log(`[Immoscout Monitor] Auto-filled ${filled} fields`);
+  }
+
   function findListingElement(listing) {
     const allEls = document.querySelectorAll('[data-id], [class*="listing"]');
     for (const el of allEls) {
@@ -250,6 +327,8 @@
       console.log('[Immoscout Monitor] TEST: Pretending current listings are new');
       chrome.storage.local.set({ lastSeenListings: [] });
       checkForNewListings();
+    } else if (message.type === 'AUTO_FILL_FORM') {
+      autoFillForm(message.settings);
     }
     return true;
   });

@@ -212,6 +212,18 @@ document.getElementById('testNotificationBtn').addEventListener('click', () => {
   sendToContent({ type: 'TEST_NOTIFICATION' });
 });
 
+document.getElementById('autoFillBtn').addEventListener('click', async () => {
+  const settings = await loadSettings();
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    if (tabs[0]) {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        type: 'AUTO_FILL_FORM',
+        settings
+      });
+    }
+  });
+});
+
 document.getElementById('testTelegramBtn').addEventListener('click', async () => {
   const botToken = document.getElementById('telegramBotToken').value.trim();
   const chatId = document.getElementById('telegramChatId').value.trim();
