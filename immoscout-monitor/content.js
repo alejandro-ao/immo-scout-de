@@ -163,6 +163,44 @@
     pollInterval = newRate * 1000;
   }
 
+  function highlightListings(listings) {
+    const style = document.createElement('style');
+    style.id = 'immoscout-monitor-highlight';
+    style.textContent = `
+      @keyframes immoscout-highlight-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(0, 210, 106, 0.7); }
+        50% { box-shadow: 0 0 0 15px rgba(0, 210, 106, 0); }
+      }
+      .immoscout-new-listing {
+        animation: immoscout-highlight-pulse 1.5s ease-in-out 3;
+        outline: 3px solid #00d26a !important;
+        position: relative;
+        z-index: 1000;
+      }
+    `;
+    document.head.appendChild(style);
+
+    let highlighted = 0;
+    listings.forEach(listing => {
+      const el = document.querySelector(`[data-id="${listing.id}"]`);
+      if (el) {
+        el.classList.add('immoscout-new-listing');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        highlighted++;
+        setTimeout(() => {
+          el.classList.remove('immoscout-new-listing');
+        }, 5000);
+      }
+    });
+
+    setTimeout(() => {
+      const styleEl = document.getElementById('immoscout-monitor-highlight');
+      if (styleEl) styleEl.remove();
+    }, 6000);
+
+    console.log(`[Immoscout Monitor] Highlighted ${highlighted} of ${listings.length} listings`);
+  }
+
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'GET_STATUS') {
       sendResponse({ isMonitoring });
@@ -178,6 +216,8 @@
     } else if (message.type === 'UPDATE_REFRESH_RATE') {
       updateRefreshRate(message.refreshRate);
       sendResponse({ success: true });
+    } else if (message.type === 'HIGHLIGHT_LISTINGS') {
+      highlightListings(message.listings);
     }
     return true;
   });

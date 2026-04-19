@@ -1,5 +1,6 @@
 const SOUND_URL = chrome.runtime.getURL('notification.wav');
 let audio = null;
+let pendingListings = [];
 
 function playSound() {
   if (!audio) {
@@ -19,10 +20,12 @@ async function showNotification(listings) {
 
   playSound();
 
+  pendingListings = listings;
+
   chrome.notifications.create({
     type: 'basic',
     iconUrl: chrome.runtime.getURL('icon.png'),
-    title: 'New Listing Found!',
+    title: count === 1 ? 'New Listing Found!' : `${count} New Listings Found!`,
     body: body,
     priority: 2
   }, notificationId => {
@@ -34,11 +37,20 @@ async function showNotification(listings) {
 
 chrome.notifications.onClicked.addListener(notificationId => {
   chrome.notifications.clear(notificationId);
-  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    if (tabs[0]) {
-      chrome.tabs.update(tabs[0].id, { active: true });
-    }
-  });
+
+  if (pendingListings.length > 0) {
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+      if (tabs[0]) {
+        chrome.tabs.update(tabs[0].id, { active: true });
+        chrome.tabs.sendMessage(tabs[0].id, {
+          type: 'HIGHLIGHT_LISTINGS',
+          listings: pendingListings
+        });
+      }
+    });
+  }
+
+  pendingListings = [];
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
