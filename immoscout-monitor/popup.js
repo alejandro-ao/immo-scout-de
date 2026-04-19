@@ -52,10 +52,15 @@ async function getCurrentTab() {
   return tab;
 }
 
+function isImmoscoutTab(tab) {
+  return Boolean(tab?.url && /^https?:\/\/([^.]+\.)?immobilienscout24\.de\//.test(tab.url));
+}
+
 async function sendToContent(message) {
   try {
     const tab = await getCurrentTab();
     if (!tab || !tab.id) return null;
+    if (!isImmoscoutTab(tab)) return null;
     return new Promise((resolve) => {
       chrome.tabs.sendMessage(tab.id, message, (response) => {
         if (chrome.runtime.lastError) {
@@ -73,6 +78,16 @@ async function sendToContent(message) {
 }
 
 async function updateStatus() {
+  const tab = await getCurrentTab();
+  if (!isImmoscoutTab(tab)) {
+    isMonitoring = false;
+    statusDot.classList.remove('monitoring');
+    statusText.textContent = 'Open an ImmoScout24 tab';
+    toggleBtn.textContent = 'Start Monitoring';
+    toggleBtn.classList.remove('stop');
+    return;
+  }
+
   const response = await sendToContent({ type: 'GET_STATUS' });
   if (response !== null) {
     isMonitoring = response.isMonitoring;
@@ -96,6 +111,12 @@ function updateUI() {
 }
 
 async function toggleMonitoring() {
+  const tab = await getCurrentTab();
+  if (!isImmoscoutTab(tab)) {
+    lastCheck.textContent = 'Last check: Open an ImmoScout24 listing page first';
+    return;
+  }
+
   if (isMonitoring) {
     await sendToContent({ type: 'STOP' });
   } else {
@@ -106,7 +127,11 @@ async function toggleMonitoring() {
 }
 
 async function checkNow() {
-  await sendToContent({ type: 'CHECK_NOW' });
+  const response = await sendToContent({ type: 'CHECK_NOW' });
+  if (response === null) {
+    lastCheck.textContent = 'Last check: Open an ImmoScout24 listing page first';
+    return;
+  }
   lastCheck.textContent = `Last check: ${new Date().toLocaleTimeString()}`;
 }
 
@@ -178,7 +203,7 @@ checkNowBtn.addEventListener('click', checkNow);
 resetBtn.addEventListener('click', resetCount);
 
 document.getElementById('testNotificationBtn').addEventListener('click', () => {
-  sendToContent({ type: 'TEST_NOTIFICATION' });
+  chrome.runtime.sendMessage({ type: 'TEST_NOTIFICATION' });
 });
 settingsBtn.addEventListener('click', toggleSettings);
 

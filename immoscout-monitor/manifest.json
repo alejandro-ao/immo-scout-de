@@ -2,12 +2,14 @@
   "manifest_version": 3,
   "name": "Immoscout Monitor",
   "version": "1.0.0",
+  "minimum_chrome_version": "109",
   "description": "Monitor Immoscout24 for new apartment listings and get notified",
   "permissions": [
     "activeTab",
     "storage",
     "notifications",
-    "scripting"
+    "scripting",
+    "offscreen"
   ],
   "host_permissions": [
     "https://www.immobilienscout24.de/*"
