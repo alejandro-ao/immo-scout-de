@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Immoscout Monitor</h1>
+
+    <div class="status">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Idle</span>
+    </div>
+
+    <div class="last-check" id="lastCheck">Last check: Never</div>
+
+    <div class="new-count" id="newCount">New since reset: 0</div>
+
+    <div class="buttons">
+      <button id="toggleBtn" class="btn primary">Start Monitoring</button>
+      <button id="checkNowBtn" class="btn secondary">Check Now</button>
+      <button id="resetBtn" class="btn secondary">Reset Count</button>
+    </div>
+
+    <div class="message-link">
+      <a href="#" id="openMessage">Edit message template</a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Immoscout Monitor",
+  "version": "1.0.0",
+  "description": "Monitor Immoscout24 for new apartment listings and get notified",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "notifications"
+  ],
+  "host_permissions": [
+    "https://www.immoscout24.de/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.immoscout24.de/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "32": "icon.png",
+      "48": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}

@@ -1,0 +1,118 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 300px;
+  background: #1a1a2e;
+  color: #eee;
+}
+
+.container {
+  padding: 16px;
+}
+
+h1 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #666;
+}
+
+.status-dot.monitoring {
+  background: #00d26a;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+#statusText {
+  font-size: 14px;
+  color: #aaa;
+}
+
+.last-check {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.new-count {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 16px;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn.primary {
+  background: #00d26a;
+  color: #000;
+}
+
+.btn.primary:hover {
+  background: #00b85c;
+}
+
+.btn.primary.stop {
+  background: #ff4757;
+  color: #fff;
+}
+
+.btn.secondary {
+  background: #2a2a4a;
+  color: #eee;
+}
+
+.btn.secondary:hover {
+  background: #3a3a5a;
+}
+
+.message-link {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.message-link a {
+  color: #666;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.message-link a:hover {
+  color: #999;
+}
