@@ -21,9 +21,9 @@ async function sendTelegramMessage(listings) {
     return;
   }
 
-  const count = listings.length;
-  const message = listings.map(l => `� *${l.title}*\n${l.link}`).join('\n\n');
-  const fullMessage = `� *Immoscout: ${count} new listing${count > 1 ? 's' : ''}!*\n\n${message}`;
+const count = listings.length;
+  const message = listings.map(l => `${l.title}\n${l.link}`).join('\n\n');
+  const fullMessage = `[IMMOSCOUT] ${count} new listing${count > 1 ? 's' : ''}!\n\n${message}`;
 
   try {
     const response = await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
@@ -31,8 +31,7 @@ async function sendTelegramMessage(listings) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: settings.telegramChatId,
-        text: fullMessage,
-        parse_mode: 'Markdown'
+        text: fullMessage
       })
     });
     const data = await response.json();
