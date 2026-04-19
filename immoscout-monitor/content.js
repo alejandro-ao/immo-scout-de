@@ -204,14 +204,6 @@
       hasPets: settings.hasPets || ''
     };
 
-    const addressParts = (settings.address || '').split(' ');
-    const street = addressParts.slice(0, -1).join(' ') || settings.address;
-    const houseNumber = addressParts[addressParts.length - 1] || '';
-
-    const cityPostcode = settings.address ? settings.address.match(/(\d{5})\s+(.+)/) : null;
-    const postcode = cityPostcode ? cityPostcode[1] : '';
-    const city = cityPostcode ? cityPostcode[2] : '';
-
     let filled = 0;
 
     Object.entries(formSelectors).forEach(([key, selector]) => {
@@ -227,22 +219,22 @@
           filled++;
         }
       } else if (key === 'street') {
-        value = street;
+        value = settings.address || '';
         el.value = value;
         el.dispatchEvent(new Event('input', { bubbles: true }));
         filled++;
       } else if (key === 'houseNumber') {
-        value = houseNumber;
+        value = settings.address ? settings.address.match(/\d+/) ? settings.address.match(/\d+/)[0] : '' : '';
         el.value = value;
         el.dispatchEvent(new Event('input', { bubbles: true }));
         filled++;
       } else if (key === 'postcode') {
-        value = postcode;
+        value = settings.postalCode || '';
         el.value = value;
         el.dispatchEvent(new Event('input', { bubbles: true }));
         filled++;
       } else if (key === 'city') {
-        value = city;
+        value = settings.city || '';
         el.value = value;
         el.dispatchEvent(new Event('input', { bubbles: true }));
         filled++;

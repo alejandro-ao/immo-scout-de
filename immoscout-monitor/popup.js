@@ -38,6 +38,9 @@ Mit freundlichen Grüßen`,
   firstName: '',
   lastName: '',
   address: '',
+  postalCode: '',
+  city: '',
+  country: '',
   email: '',
   phone: '',
   monthlyIncome: '',
@@ -175,7 +178,10 @@ async function loadSettingsIntoForm() {
   messageTemplateInput.value = settings.messageTemplate;
   firstNameInput.value = settings.firstName;
   lastNameInput.value = settings.lastName;
-  addressInput.value = settings.address;
+  addressInput.value = settings.address || '';
+  document.getElementById('postalCode').value = settings.postalCode || '';
+  document.getElementById('city').value = settings.city || '';
+  document.getElementById('country').value = settings.country || '';
   emailInput.value = settings.email;
   phoneInput.value = settings.phone;
   monthlyIncomeInput.value = settings.monthlyIncome;
@@ -196,6 +202,9 @@ async function saveSettings() {
     firstName: firstNameInput.value,
     lastName: lastNameInput.value,
     address: addressInput.value,
+    postalCode: document.getElementById('postalCode').value,
+    city: document.getElementById('city').value,
+    country: document.getElementById('country').value,
     email: emailInput.value,
     phone: phoneInput.value,
     monthlyIncome: monthlyIncomeInput.value,
