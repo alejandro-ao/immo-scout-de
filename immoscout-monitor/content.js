@@ -92,17 +92,29 @@
       return;
     }
 
+    console.log(`[Immoscout Monitor] Fetching: ${pageUrl}`);
+    const startTime = Date.now();
+
     try {
       const response = await fetch(pageUrl, { credentials: 'include' });
+      const elapsed = Date.now() - startTime;
+      console.log(`[Immoscout Monitor] Response: ${response.status} ${response.statusText} (${elapsed}ms)`);
+
       if (!response.ok) {
         throw new Error(`Fetch failed: ${response.status}`);
       }
+
       const html = await response.text();
+      console.log(`[Immoscout Monitor] HTML length: ${html.length} chars`);
+
       const currentListings = parseListingsFromHTML(html);
       const previousListings = await getLastSeenListings();
       const newListings = findNewListings(currentListings, previousListings);
 
+      console.log(`[Immoscout Monitor] Listings: ${currentListings.length} found, ${newListings.length} new, ${previousListings.length} previous`);
+
       if (newListings.length > 0) {
+        console.log(`[Immoscout Monitor] New listings:`, newListings.map(l => l.title));
         chrome.runtime.sendMessage({
           type: 'NEW_LISTINGS',
           listings: newListings
@@ -110,9 +122,8 @@
       }
 
       await saveLastSeenListings(currentListings);
-      console.log(`[Immoscout Monitor] Checked ${currentListings.length} listings, found ${newListings.length} new`);
     } catch (err) {
-      console.error('[Immoscout Monitor] Fetch error:', err.message);
+      console.error(`[Immoscout Monitor] Error: ${err.message}`);
     }
   }
 
