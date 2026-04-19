@@ -12,7 +12,8 @@
     "offscreen"
   ],
   "host_permissions": [
-    "https://www.immobilienscout24.de/*"
+    "https://www.immobilienscout24.de/*",
+    "https://api.telegram.org/*"
   ],
   "background": {
     "service_worker": "background.js"

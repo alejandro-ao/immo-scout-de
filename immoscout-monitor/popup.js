@@ -42,7 +42,9 @@ Mit freundlichen Grüßen`,
   phone: '',
   monthlyIncome: '',
   birthYear: '',
-  occupation: ''
+  occupation: '',
+  telegramBotToken: '',
+  telegramChatId: ''
 };
 
 const SETTINGS_KEY = 'userSettings';
@@ -175,6 +177,8 @@ async function loadSettingsIntoForm() {
   monthlyIncomeInput.value = settings.monthlyIncome;
   birthYearInput.value = settings.birthYear;
   occupationInput.value = settings.occupation;
+  document.getElementById('telegramBotToken').value = settings.telegramBotToken || '';
+  document.getElementById('telegramChatId').value = settings.telegramChatId || '';
 }
 
 async function saveSettings() {
@@ -188,7 +192,9 @@ async function saveSettings() {
     phone: phoneInput.value,
     monthlyIncome: monthlyIncomeInput.value,
     birthYear: birthYearInput.value,
-    occupation: occupationInput.value
+    occupation: occupationInput.value,
+    telegramBotToken: document.getElementById('telegramBotToken').value,
+    telegramChatId: document.getElementById('telegramChatId').value
   };
 
   return new Promise(resolve => {
@@ -203,8 +209,46 @@ checkNowBtn.addEventListener('click', checkNow);
 resetBtn.addEventListener('click', resetCount);
 
 document.getElementById('testNotificationBtn').addEventListener('click', () => {
-  chrome.runtime.sendMessage({ type: 'TEST_NOTIFICATION' });
+  sendToContent({ type: 'TEST_NOTIFICATION' });
 });
+
+document.getElementById('testTelegramBtn').addEventListener('click', async () => {
+  const settings = await loadSettings();
+  if (!settings.telegramBotToken || !settings.telegramChatId) {
+    alert('Please enter both Telegram Bot Token and Chat ID');
+    return;
+  }
+  const btn = document.getElementById('testTelegramBtn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  const testMessage = `�テスト / Test: Immoscout Monitor is working! Time: ${new Date().toLocaleTimeString()}`;
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: settings.telegramChatId,
+        text: testMessage
+      })
+    });
+    const data = await response.json();
+    if (data.ok) {
+      btn.textContent = 'Sent!';
+    } else {
+      btn.textContent = 'Failed: ' + (data.description || 'Unknown error');
+    }
+  } catch (err) {
+    btn.textContent = 'Error: ' + err.message;
+  }
+
+  setTimeout(() => {
+    btn.textContent = 'Test Telegram';
+    btn.disabled = false;
+  }, 3000);
+});
+
 settingsBtn.addEventListener('click', toggleSettings);
 
 refreshRateInput.addEventListener('input', () => {

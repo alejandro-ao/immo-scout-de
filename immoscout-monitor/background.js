@@ -9,6 +9,43 @@ function updateBadge(count) {
   }
 }
 
+async function sendTelegramMessage(listings) {
+  const settings = await new Promise(resolve => {
+    chrome.storage.local.get('userSettings', result => {
+      resolve(result.userSettings || {});
+    });
+  });
+
+  if (!settings.telegramBotToken || !settings.telegramChatId) {
+    console.log('[Immoscout Monitor] Telegram not configured, skipping');
+    return;
+  }
+
+  const count = listings.length;
+  const message = listings.map(l => `� *${l.title}*\n${l.link}`).join('\n\n');
+  const fullMessage = `� *Immoscout: ${count} new listing${count > 1 ? 's' : ''}!*\n\n${message}`;
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${settings.telegramBotToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: settings.telegramChatId,
+        text: fullMessage,
+        parse_mode: 'Markdown'
+      })
+    });
+    const data = await response.json();
+    if (data.ok) {
+      console.log('[Immoscout Monitor] Telegram message sent successfully');
+    } else {
+      console.error('[Immoscout Monitor] Telegram error:', data.description);
+    }
+  } catch (err) {
+    console.error('[Immoscout Monitor] Telegram fetch error:', err.message);
+  }
+}
+
 async function showNotification(listings) {
   const count = listings.length;
   const firstTitle = listings[0].title;
@@ -34,18 +71,8 @@ async function showNotification(listings) {
     }
   });
 
-  // Flash the tab to get user's attention
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab) {
-    console.log('[Immoscout Monitor] Flashing tab:', tab.id);
-    chrome.tabs.update(tab.id, { active: false }, () => {
-      setTimeout(() => {
-        chrome.tabs.update(tab.id, { active: true }, () => {
-          console.log('[Immoscout Monitor] Tab flashed');
-        });
-      }, 100);
-    });
-  }
+  // Send Telegram notification
+  sendTelegramMessage(listings);
 }
 
 chrome.notifications.onClicked.addListener(notificationId => {
