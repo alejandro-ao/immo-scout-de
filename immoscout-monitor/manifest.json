@@ -9,14 +9,14 @@
     "notifications"
   ],
   "host_permissions": [
-    "https://www.immoscout24.de/*"
+    "https://www.immobilienscout24.de/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["*://*.immoscout24.de/*"],
+      "matches": ["*://*.immobilienscout24.de/*"],
       "js": ["content.js"],
       "run_at": "document_idle"
     }
