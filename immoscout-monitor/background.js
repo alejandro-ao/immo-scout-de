@@ -3,7 +3,8 @@ let pendingListings = [];
 
 async function playSoundInTab(tabId) {
   try {
-    await chrome.tabs.executeScript(tabId, {
+    await chrome.scripting.executeScript({
+      target: { tabId },
       code: `
         const audio = new Audio('${SOUND_URL}');
         audio.play().then(() => console.log('[Immoscout Monitor] Sound played')).catch(e => console.error('[Immoscout Monitor] Sound error:', e));
