@@ -15,17 +15,22 @@ async function getCurrentTab() {
 }
 
 async function sendToContent(message) {
-  const tab = await getCurrentTab();
-  if (!tab || !tab.id) return null;
-  return chrome.tabs.sendMessage(tab.id, message);
+  try {
+    const tab = await getCurrentTab();
+    if (!tab || !tab.id) return null;
+    return await chrome.tabs.sendMessage(tab.id, message);
+  } catch (e) {
+    console.warn('Content script not ready:', e.message);
+    return null;
+  }
 }
 
 async function updateStatus() {
   const response = await sendToContent({ type: 'GET_STATUS' });
-  if (response) {
+  if (response !== null) {
     isMonitoring = response.isMonitoring;
-    updateUI();
   }
+  updateUI();
 }
 
 function updateUI() {

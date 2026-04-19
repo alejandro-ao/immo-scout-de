@@ -12,39 +12,37 @@
     return TAUSCH_PATTERNS.some(pattern => pattern.test(title));
   }
 
-  function getListingId(listing) {
-    const idMatch = listing.id?.match(/\d+/) ||
-                    listing.dataset?.id ||
-                    listing.querySelector('[data-id]')?.dataset?.id;
-    return idMatch || null;
-  }
-
   function extractListings() {
-    const selectors = [
-      '[data-id]',
-      '.result-list__listing',
-      'article.listing-item',
-      '.listing-item',
-      '[class*="listing"]'
-    ];
+    const containers = document.querySelectorAll('[data-id]');
+    const listings = [];
 
-    let listings = [];
+    containers.forEach(el => {
+      const id = el.getAttribute('data-id');
+      const titleEl = el.querySelector('h2, h3, [class*="title"]');
+      const title = titleEl?.textContent?.trim() || '';
+      const linkEl = el.querySelector('a');
+      const link = linkEl?.href || '';
 
-    for (const selector of selectors) {
-      const elements = document.querySelectorAll(selector);
-      if (elements.length > 0) {
-        elements.forEach(el => {
-          const id = getListingId(el);
-          const titleEl = el.querySelector('h2, h3, .title, [class*="title"]');
-          const title = titleEl?.textContent?.trim() || '';
-          const link = el.querySelector('a')?.href || '';
-
-          if (id && !isTauschWohnung(title)) {
-            listings.push({ id, title, link });
-          }
-        });
-        break;
+      if (id && !isTauschWohnung(title)) {
+        listings.push({ id, title, link });
       }
+    });
+
+    if (listings.length === 0) {
+      const fallback = document.querySelectorAll('[class*="listing"]');
+      fallback.forEach(el => {
+        const id = el.getAttribute('data-id') ||
+                   el.id ||
+                   Math.random().toString(36).substr(2, 9);
+        const titleEl = el.querySelector('h2, h3, [class*="title"]');
+        const title = titleEl?.textContent?.trim() || '';
+        const linkEl = el.querySelector('a');
+        const link = linkEl?.href || '';
+
+        if (!isTauschWohnung(title)) {
+          listings.push({ id, title, link });
+        }
+      });
     }
 
     return listings;
@@ -121,5 +119,5 @@
     return true;
   });
 
-  console.log('[Immoscout Monitor] Content script loaded');
+  console.log('[Immoscout Monitor] Content script loaded, found', document.querySelectorAll('[data-id]').length, 'listings');
 })();
