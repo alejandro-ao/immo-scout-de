@@ -2,6 +2,7 @@
   'use strict';
 
   const DEFAULT_POLL_INTERVAL = 180000;
+  const Jitter_MAX = 15000;
   const STORAGE_KEY = 'lastSeenListings';
   const SETTINGS_KEY = 'userSettings';
   const TAUSCH_PATTERNS = [/tauschwohnung/i, /wohnungstausch/i];
@@ -14,24 +15,15 @@
     return TAUSCH_PATTERNS.some(pattern => pattern.test(title));
   }
 
-  function extractListings() {
-    const containers = document.querySelectorAll('[data-id]');
+  function parseListingsFromHTML(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
     const listings = [];
 
-    containers.forEach(el => {
-      const id = el.getAttribute('data-id');
-      const titleEl = el.querySelector('h2, h3, [class*="title"]');
-      const title = titleEl?.textContent?.trim() || '';
-      const linkEl = el.querySelector('a');
-      const link = linkEl?.href || '';
+    const containers = doc.querySelectorAll('[data-id]');
 
-      if (id && !isTauschWohnung(title)) {
-        listings.push({ id, title, link });
-      }
-    });
-
-    if (listings.length === 0) {
-      const fallback = document.querySelectorAll('[class*="listing"]');
+    if (containers.length === 0) {
+      const fallback = doc.querySelectorAll('[class*="listing"]');
       fallback.forEach(el => {
         const id = el.getAttribute('data-id') ||
                    el.id ||
@@ -42,6 +34,18 @@
         const link = linkEl?.href || '';
 
         if (!isTauschWohnung(title)) {
+          listings.push({ id, title, link });
+        }
+      });
+    } else {
+      containers.forEach(el => {
+        const id = el.getAttribute('data-id');
+        const titleEl = el.querySelector('h2, h3, [class*="title"]');
+        const title = titleEl?.textContent?.trim() || '';
+        const linkEl = el.querySelector('a');
+        const link = linkEl?.href || '';
+
+        if (id && !isTauschWohnung(title)) {
           listings.push({ id, title, link });
         }
       });
@@ -71,36 +75,71 @@
     return current.filter(l => !previousIds.has(l.id));
   }
 
+  async function getCurrentPageUrl() {
+    return new Promise(resolve => {
+      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        resolve(tabs[0]?.url || null);
+      });
+    });
+  }
+
   async function checkForNewListings() {
     if (!isMonitoring) return;
 
-    const currentListings = extractListings();
-    const previousListings = await getLastSeenListings();
-    const newListings = findNewListings(currentListings, previousListings);
-
-    if (newListings.length > 0) {
-      chrome.runtime.sendMessage({
-        type: 'NEW_LISTINGS',
-        listings: newListings
-      });
+    const pageUrl = await getCurrentPageUrl();
+    if (!pageUrl || !pageUrl.includes('immobilienscout24.de')) {
+      console.log('[Immoscout Monitor] Not on Immoscout page, skipping');
+      return;
     }
 
-    await saveLastSeenListings(currentListings);
+    try {
+      const response = await fetch(pageUrl, { credentials: 'include' });
+      if (!response.ok) {
+        throw new Error(`Fetch failed: ${response.status}`);
+      }
+      const html = await response.text();
+      const currentListings = parseListingsFromHTML(html);
+      const previousListings = await getLastSeenListings();
+      const newListings = findNewListings(currentListings, previousListings);
+
+      if (newListings.length > 0) {
+        chrome.runtime.sendMessage({
+          type: 'NEW_LISTINGS',
+          listings: newListings
+        });
+      }
+
+      await saveLastSeenListings(currentListings);
+      console.log(`[Immoscout Monitor] Checked ${currentListings.length} listings, found ${newListings.length} new`);
+    } catch (err) {
+      console.error('[Immoscout Monitor] Fetch error:', err.message);
+    }
   }
 
   function startMonitoring(refreshRate) {
     if (isMonitoring) return;
     isMonitoring = true;
     pollInterval = (refreshRate || DEFAULT_POLL_INTERVAL) * 1000;
-    checkForNewListings();
-    pollTimer = setInterval(checkForNewListings, pollInterval);
+    scheduleNextCheck();
     chrome.runtime.sendMessage({ type: 'MONITORING_STARTED' });
+  }
+
+  function scheduleNextCheck() {
+    if (!isMonitoring) return;
+
+    const jitter = Math.floor(Math.random() * Jitter_MAX);
+    const delay = pollInterval + jitter;
+
+    pollTimer = setTimeout(async () => {
+      await checkForNewListings();
+      scheduleNextCheck();
+    }, delay);
   }
 
   function stopMonitoring() {
     isMonitoring = false;
     if (pollTimer) {
-      clearInterval(pollTimer);
+      clearTimeout(pollTimer);
       pollTimer = null;
     }
     chrome.runtime.sendMessage({ type: 'MONITORING_STOPPED' });
@@ -108,10 +147,6 @@
 
   function updateRefreshRate(newRate) {
     pollInterval = newRate * 1000;
-    if (isMonitoring && pollTimer) {
-      clearInterval(pollTimer);
-      pollTimer = setInterval(checkForNewListings, pollInterval);
-    }
   }
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -133,5 +168,5 @@
     return true;
   });
 
-  console.log('[Immoscout Monitor] Content script loaded, found', document.querySelectorAll('[data-id]').length, 'listings');
+  console.log('[Immoscout Monitor] Content script loaded (background fetch mode)');
 })();
