@@ -75,23 +75,14 @@
     return current.filter(l => !previousIds.has(l.id));
   }
 
-  async function getCurrentPageUrl() {
-    return new Promise(resolve => {
-      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-        if (chrome.runtime.lastError) {
-          console.error('[Immoscout Monitor] Tab query error:', chrome.runtime.lastError.message);
-          resolve(null);
-          return;
-        }
-        resolve(tabs?.[0]?.url || null);
-      });
-    });
+  function getCurrentPageUrl() {
+    return window.location.href;
   }
 
   async function checkForNewListings() {
     if (!isMonitoring) return;
 
-    const pageUrl = await getCurrentPageUrl();
+    const pageUrl = getCurrentPageUrl();
     if (!pageUrl || !pageUrl.includes('immobilienscout24.de')) {
       console.log('[Immoscout Monitor] Not on Immoscout page, skipping');
       return;
