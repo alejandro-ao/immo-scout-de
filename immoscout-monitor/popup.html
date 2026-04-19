@@ -50,62 +50,76 @@
 
       <div class="field-row">
         <div class="field">
-          <input type="text" id="firstName" placeholder="First Name">
-        </div>
-        <div class="field">
-          <input type="text" id="lastName" placeholder="Last Name">
-        </div>
-      </div>
-
-      <div class="field">
-        <input type="text" id="address" placeholder="Current Address">
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <input type="email" id="email" placeholder="Email">
-        </div>
-        <div class="field">
-          <input type="tel" id="phone" placeholder="Phone">
+          <label>Salutation</label>
+          <select id="salutation">
+            <option value="">Select...</option>
+            <option value="MALE">Mister</option>
+            <option value="FEMALE">Woman</option>
+            <option value="COMPANY">Company</option>
+          </select>
         </div>
       </div>
 
       <div class="field-row">
         <div class="field">
-          <input type="text" id="monthlyIncome" placeholder="Monthly Income (netto)">
+          <label>First Name</label>
+          <input type="text" id="firstName" placeholder="">
         </div>
         <div class="field">
-          <input type="number" id="birthYear" placeholder="Birth Year">
+          <label>Last Name</label>
+          <input type="text" id="lastName" placeholder="">
         </div>
       </div>
 
       <div class="field">
-        <input type="text" id="occupation" placeholder="Occupation">
+        <label>Street, Number, Postal Code, City</label>
+        <input type="text" id="address" placeholder="e.g. Hauptstr. 10 10999 Berlin">
       </div>
 
       <div class="field-row">
         <div class="field">
-          <input type="number" id="numberOfAdults" placeholder="Adults" min="1">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="">
         </div>
         <div class="field">
-          <input type="number" id="numberOfKids" placeholder="Children" min="0">
+          <label>Phone</label>
+          <input type="tel" id="phone" placeholder="">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Monthly Income (netto)</label>
+          <input type="text" id="monthlyIncome" placeholder="e.g. 3000">
+        </div>
+        <div class="field">
+          <label>Birth Year</label>
+          <input type="number" id="birthYear" placeholder="e.g. 1990">
         </div>
       </div>
 
       <div class="field">
-        <select id="hasPets" style="width: 100%; padding: 8px 10px; background: #2a2a4a; border: 1px solid #3a3a5a; border-radius: 6px; color: #eee; font-size: 13px;">
-          <option value="">Pets?</option>
-          <option value="TRUE">Yes</option>
+        <label>Occupation</label>
+        <input type="text" id="occupation" placeholder="">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Adults</label>
+          <input type="number" id="numberOfAdults" min="1" value="1">
+        </div>
+        <div class="field">
+          <label>Children</label>
+          <input type="number" id="numberOfKids" min="0" value="0">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Pets</label>
+        <select id="hasPets">
+          <option value="">Select...</option>
           <option value="FALSE">No</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <select id="salutation" style="width: 100%; padding: 8px 10px; background: #2a2a4a; border: 1px solid #3a3a5a; border-radius: 6px; color: #eee; font-size: 13px;">
-          <option value="">Salutation</option>
-          <option value="MALE">Mister</option>
-          <option value="FEMALE">Woman</option>
-          <option value="COMPANY">Company</option>
+          <option value="TRUE">Yes</option>
         </select>
       </div>
 
@@ -118,11 +132,13 @@
       </div>
 
       <div class="field">
-        <input type="text" id="telegramBotToken" placeholder="Bot Token (e.g. 123456:ABC-...)">
+        <label>Bot Token</label>
+        <input type="text" id="telegramBotToken" placeholder="e.g. 123456:ABC-...">
       </div>
 
       <div class="field">
-        <input type="text" id="telegramChatId" placeholder="Your Chat ID">
+        <label>Chat ID</label>
+        <input type="text" id="telegramChatId" placeholder="">
       </div>
 
       <div class="buttons">

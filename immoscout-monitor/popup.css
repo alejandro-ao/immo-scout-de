@@ -222,6 +222,30 @@ input::placeholder {
   color: #666;
 }
 
+label {
+  display: block;
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+select {
+  width: 100%;
+  padding: 8px 10px;
+  background: #2a2a4a;
+  border: 1px solid #3a3a5a;
+  border-radius: 6px;
+  color: #eee;
+  font-size: 13px;
+}
+
+select:focus {
+  outline: none;
+  border-color: #00d26a;
+}
+
 .telegram-help {
   margin-bottom: 12px;
 }
