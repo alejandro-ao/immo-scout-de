@@ -2,6 +2,7 @@ let isMonitoring = false;
 let newListingCount = 0;
 let countdownInterval = null;
 let nextRefreshTime = null;
+let lastCheckTime = null;
 
 const statusDot = document.getElementById('statusDot');
 const statusText = document.getElementById('statusText');
@@ -105,6 +106,10 @@ async function updateStatus() {
     isMonitoring = response.isMonitoring;
   }
   updateUI();
+  if (isMonitoring && nextRefreshTime === null) {
+    const settings = await loadSettings();
+    startCountdown(settings.refreshRate);
+  }
 }
 
 function updateUI() {
@@ -126,6 +131,7 @@ function updateUI() {
 function startCountdown(intervalSeconds) {
   stopCountdown();
   nextRefreshTime = Date.now() + (intervalSeconds * 1000);
+  chrome.storage.local.set({ nextRefreshTime });
   updateCountdown();
   countdownInterval = setInterval(updateCountdown, 1000);
 }
@@ -136,6 +142,7 @@ function stopCountdown() {
     countdownInterval = null;
   }
   nextRefreshTime = null;
+  chrome.storage.local.set({ nextRefreshTime: null });
 }
 
 function updateCountdown() {
@@ -147,6 +154,12 @@ function updateCountdown() {
     nextRefresh.textContent = `Next refresh in: ${mins}m ${secs}s`;
   } else {
     nextRefresh.textContent = `Next refresh in: ${secs}s`;
+  }
+}
+
+function updateLastCheckDisplay() {
+  if (lastCheckTime) {
+    lastCheck.textContent = `Last check: ${new Date(lastCheckTime).toLocaleTimeString()}`;
   }
 }
 
@@ -174,7 +187,9 @@ async function checkNow() {
     lastCheck.textContent = 'Last check: Open an ImmoScout24 listing page first';
     return;
   }
-  lastCheck.textContent = `Last check: ${new Date().toLocaleTimeString()}`;
+  lastCheckTime = Date.now();
+  chrome.storage.local.set({ lastCheckTime });
+  updateLastCheckDisplay();
   if (isMonitoring) {
     const settings = await loadSettings();
     startCountdown(settings.refreshRate);
@@ -366,6 +381,9 @@ chrome.runtime.onMessage.addListener(async message => {
   } else if (message.type === 'NEW_LISTINGS') {
     newListingCount += message.listings.length;
     chrome.storage.local.set({ newListingCount });
+    lastCheckTime = Date.now();
+    chrome.storage.local.set({ lastCheckTime });
+    updateLastCheckDisplay();
     const settings = await loadSettings();
     startCountdown(settings.refreshRate);
     updateUI();
@@ -373,4 +391,22 @@ chrome.runtime.onMessage.addListener(async message => {
 });
 
 loadSettingsIntoForm();
+
+chrome.storage.local.get(['lastCheckTime', 'nextRefreshTime'], result => {
+  if (result.lastCheckTime) {
+    lastCheckTime = result.lastCheckTime;
+    updateLastCheckDisplay();
+  }
+  if (result.nextRefreshTime) {
+    nextRefreshTime = result.nextRefreshTime;
+    if (nextRefreshTime > Date.now()) {
+      updateCountdown();
+      countdownInterval = setInterval(updateCountdown, 1000);
+    } else {
+      nextRefreshTime = null;
+      chrome.storage.local.set({ nextRefreshTime: null });
+    }
+  }
+});
+
 updateStatus();
