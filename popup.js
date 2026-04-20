@@ -1,9 +1,12 @@
 let isMonitoring = false;
 let newListingCount = 0;
+let countdownInterval = null;
+let nextRefreshTime = null;
 
 const statusDot = document.getElementById('statusDot');
 const statusText = document.getElementById('statusText');
 const lastCheck = document.getElementById('lastCheck');
+const nextRefresh = document.getElementById('nextRefresh');
 const newCount = document.getElementById('newCount');
 const toggleBtn = document.getElementById('toggleBtn');
 const checkNowBtn = document.getElementById('checkNowBtn');
@@ -115,8 +118,36 @@ function updateUI() {
     statusText.textContent = 'Idle';
     toggleBtn.textContent = 'Start Monitoring';
     toggleBtn.classList.remove('stop');
+    nextRefresh.textContent = '';
   }
   newCount.textContent = `New since reset: ${newListingCount}`;
+}
+
+function startCountdown(intervalSeconds) {
+  stopCountdown();
+  nextRefreshTime = Date.now() + (intervalSeconds * 1000);
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+}
+
+function stopCountdown() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+  nextRefreshTime = null;
+}
+
+function updateCountdown() {
+  if (!nextRefreshTime) return;
+  const remaining = Math.max(0, Math.ceil((nextRefreshTime - Date.now()) / 1000));
+  const mins = Math.floor(remaining / 60);
+  const secs = remaining % 60;
+  if (mins > 0) {
+    nextRefresh.textContent = `Next refresh in: ${mins}m ${secs}s`;
+  } else {
+    nextRefresh.textContent = `Next refresh in: ${secs}s`;
+  }
 }
 
 async function toggleMonitoring() {
@@ -128,9 +159,11 @@ async function toggleMonitoring() {
 
   if (isMonitoring) {
     await sendToContent({ type: 'STOP' });
+    stopCountdown();
   } else {
     const settings = await loadSettings();
     await sendToContent({ type: 'START', refreshRate: settings.refreshRate });
+    startCountdown(settings.refreshRate);
   }
   updateStatus();
 }
@@ -142,6 +175,10 @@ async function checkNow() {
     return;
   }
   lastCheck.textContent = `Last check: ${new Date().toLocaleTimeString()}`;
+  if (isMonitoring) {
+    const settings = await loadSettings();
+    startCountdown(settings.refreshRate);
+  }
 }
 
 function resetCount() {
@@ -316,16 +353,21 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
-chrome.runtime.onMessage.addListener(message => {
+chrome.runtime.onMessage.addListener(async message => {
   if (message.type === 'MONITORING_STARTED') {
     isMonitoring = true;
+    const settings = await loadSettings();
+    startCountdown(settings.refreshRate);
     updateUI();
   } else if (message.type === 'MONITORING_STOPPED') {
     isMonitoring = false;
+    stopCountdown();
     updateUI();
   } else if (message.type === 'NEW_LISTINGS') {
     newListingCount += message.listings.length;
     chrome.storage.local.set({ newListingCount });
+    const settings = await loadSettings();
+    startCountdown(settings.refreshRate);
     updateUI();
   }
 });
