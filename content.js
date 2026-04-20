@@ -11,6 +11,7 @@
   let pollTimer = null;
   let isMonitoring = false;
   let pollInterval = DEFAULT_POLL_INTERVAL;
+  let isShuttingDown = false;
 
   function isTauschWohnung(title) {
     return TAUSCH_PATTERNS.some(pattern => pattern.test(title));
@@ -127,14 +128,18 @@
 
       if (newListings.length > 0) {
         console.log(`[Immoscout Monitor] New listings:`, newListings.map(l => l.title));
-        chrome.runtime.sendMessage({
-          type: 'NEW_LISTINGS',
-          listings: newListings
-        }).then(() => {
-          console.log('[Immoscout Monitor] Message sent to background');
-        }).catch(err => {
-          console.error('[Immoscout Monitor] Message send failed:', err.message);
-        });
+        if (!isShuttingDown) {
+          chrome.runtime.sendMessage({
+            type: 'NEW_LISTINGS',
+            listings: newListings
+          }).then(() => {
+            console.log('[Immoscout Monitor] Message sent to background');
+          }).catch(err => {
+            if (!isShuttingDown) {
+              console.error('[Immoscout Monitor] Message send failed:', err.message);
+            }
+          });
+        }
       }
 
       await saveLastSeenListings(currentListings);
@@ -164,12 +169,14 @@
   }
 
   function stopMonitoring() {
+    isShuttingDown = true;
     isMonitoring = false;
     if (pollTimer) {
       clearTimeout(pollTimer);
       pollTimer = null;
     }
     chrome.runtime.sendMessage({ type: 'MONITORING_STOPPED' });
+    setTimeout(() => { isShuttingDown = false; }, 1000);
   }
 
   function updateRefreshRate(newRate) {
